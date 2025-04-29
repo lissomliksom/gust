@@ -73,6 +73,13 @@ export async function analyzeStyles(url) {
       const bIndex = order.findIndex((item) => b.startsWith(item));
       return aIndex - bIndex || a.localeCompare(b, undefined, { numeric: true });
     }
+
+    function sortMarginNegativeClasses(a, b) {
+      const order = ['-m-', '-my-', '-mx-', '-mt-', '-mr-', '-mb-', '-ml-'];
+      const aIndex = order.findIndex((item) => a.startsWith(item));
+      const bIndex = order.findIndex((item) => b.startsWith(item));
+      return aIndex - bIndex || a.localeCompare(b, undefined, { numeric: true });
+    }    
     
     function sortPaddingClasses(a, b) {
       const order = ['p-', 'py-', 'px-', 'pt-', 'pr-', 'pb-', 'pl-'];
@@ -86,8 +93,9 @@ export async function analyzeStyles(url) {
     const fontStyleRegex = /(?:font-(?:black|extrabold|bold|semibold|medium|normal|light|extralight|thin))/g;
     const colorRegex = /(?:rgba?\(\d{1,3},\s?\d{1,3},\s?\d{1,3}(?:,\s?[0-9.]+)?\)|#[0-9a-fA-F]{3,6})/g;
     const cssVarRegex = /--[\w-]+:\s*(#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3}|\b(?:rgb|hsl)a?\([\s\d%,.]+\))/g;
-    const marginRegex = /(?:m[trblxy]?-[\d/]+)/g;
-    const paddingRegex = /(?:p[trblxy]?-[\d/]+)/g;
+    const marginRegex = /(?:m[trblxy]?-(px|0|0\.5|1\.5|2\.5|3\.5|[\d/]+))/g;
+    const marginNegativeRegex = /(?:-m[trblxy]?-(px|0|0\.5|1\.5|2\.5|3\.5|[\d/]+))/g;
+    const paddingRegex = /(?:p[trblxy]?-(px|0|0\.5|1\.5|2\.5|3\.5|[\d/]+))/g;
     const gapRegex = /(?:\.gap-\d+)/g;
     const spaceXRegex = /(?:\.space-x-\d+)/g;
     const spaceYRegex = /(?:\.space-y-\d+)/g;
@@ -107,6 +115,7 @@ export async function analyzeStyles(url) {
     const fontStyles = [...new Set(cssText.match(fontStyleRegex))];
     const colors = [...new Set(cssText.match(colorRegex))];
     const margins = [...new Set(cssText.match(marginRegex))];
+    const marginsNegative = [...new Set(cssText.match(marginNegativeRegex))];
     const paddings = [...new Set(cssText.match(paddingRegex))];
     const gapClasses = [...new Set(cssText.match(gapRegex))];
     const spaceXClasses = [...new Set(cssText.match(spaceXRegex))];
@@ -136,6 +145,7 @@ export async function analyzeStyles(url) {
     textSizes.sort(sortTypographyClasses);
     fontStyles.sort(sortFontWeightClasses);
     const sortedMargins = margins.sort(sortMarginClasses);
+    const sortedMarginsNegative = marginsNegative.sort(sortMarginNegativeClasses);
     const sortedPaddings = paddings.sort(sortPaddingClasses);
     const sortedShadowClasses = shadowClasses.sort(sortShadowClasses);
     const sortedDropShadowClasses = dropShadowClasses.sort(sortShadowClasses);
@@ -150,16 +160,22 @@ export async function analyzeStyles(url) {
     // Group margin and padding classes by their types
     function groupClassesByType(classes) {
       return classes.reduce((acc, className) => {
-        const type = className.slice(0, 2);
+        // Regex to extract the type, considering negative values and both margins and paddings
+        const typeMatch = className.match(/^-?(m|p)([trblxy]?)-/);
+        const type = typeMatch ? `${typeMatch[1]}${typeMatch[2]}` : '';
+    
         if (!acc[type]) {
           acc[type] = [];
         }
+    
         acc[type].push(className);
         return acc;
       }, {});
     }
+
   
     const groupedMargins = groupClassesByType(sortedMargins);
+    const groupedMarginsNegative = groupClassesByType(sortedMarginsNegative);
     const groupedPaddings = groupClassesByType(sortedPaddings);
   
     const nonMatchingColors = uniqueColors.filter(color => !colors.includes(color));
@@ -179,6 +195,7 @@ export async function analyzeStyles(url) {
       textSizes,
       fontStyles,
       margins: groupedMargins,
+      marginsNegative: groupedMarginsNegative,
       paddings: groupedPaddings,
       gapClasses,
       spaceXClasses,

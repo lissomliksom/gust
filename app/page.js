@@ -11,6 +11,7 @@ export default function Home() {
   const [analyzedColors, setAnalyzedColors] = useState([]);
   const [nonMatchingColors, setNonMatchingColors] = useState([]);
   const [margins, setMargins] = useState([]);
+  const [marginsNegative, setMarginsNegative] = useState([]);
   const [paddings, setPaddings] = useState([]);
   const [textSizes, setTextSizes] = useState([]);
   const [fontStyles, setFontStyles] = useState([]);
@@ -33,7 +34,8 @@ export default function Home() {
     const { 
       colors, 
       nonMatchingColors, 
-      margins, 
+      margins,
+      marginsNegative, 
       paddings, 
       textSizes, 
       fontStyles,
@@ -55,6 +57,7 @@ export default function Home() {
     setAnalyzedColors(colors);
     setNonMatchingColors(nonMatchingColors);
     setMargins(margins);
+    setMarginsNegative(marginsNegative);
     setPaddings(paddings);
     setTextSizes(textSizes);
     setFontStyles(fontStyles);
@@ -81,6 +84,7 @@ export default function Home() {
         analyzedColors={analyzedColors}
         nonMatchingColors={nonMatchingColors}
         margins={margins}
+        marginsNegative={marginsNegative}
         paddings={paddings}
         textSizes={textSizes}
         fontStyles={fontStyles}

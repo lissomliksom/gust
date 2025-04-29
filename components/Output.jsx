@@ -11,7 +11,8 @@ export default function Output({
     colors, 
     analyzedColors, 
     nonMatchingColors, 
-    margins, 
+    margins,
+    marginsNegative,
     paddings, 
     textSizes, 
     fontStyles, 
@@ -29,7 +30,7 @@ export default function Output({
     containerMaxClasses,
     containerMinClasses,
 }) {
-
+  
     return (
     <div className="space-y-40">
         
@@ -58,6 +59,24 @@ export default function Output({
             ))}
         </div>
       </section>
+
+      <section>
+        <OutputHeader title="Margin (negative)" />
+        <div className="grid grid-cols-7 gap-4">
+            {Object.entries(marginsNegative).map(([type, values]) => (
+            <div key={type}>
+                <OutputHeader title={type} subtitle />
+                <ul>
+                {values.map((margin, index) => (
+                    <li key={index}>{margin}</li>
+                ))}
+                </ul>
+            </div>
+            ))}
+        </div>
+      </section>
+
+      
 
       <section>
         <OutputHeader title="Padding" />
@@ -152,10 +171,10 @@ export default function Output({
         </div>
       </section>
       
-      <section>
+      {/* <section>
         <OutputHeader title="Tailwind colors" />
         <ColorPalette analyzedColors={analyzedColors} />
-      </section>
+      </section> */}
         
       <section>
         <OutputHeader title="Custom colors" />
